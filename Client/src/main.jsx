@@ -38,7 +38,7 @@ const router = createBrowserRouter([
       {
         path: "register",
         element: <PatientRegistrationForm />,
-      },
+      }
     ],
   },
 ]);
