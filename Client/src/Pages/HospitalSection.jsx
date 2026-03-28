@@ -22,12 +22,12 @@ const HospitalSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Image */}
-          <div className=" order-2 lg:order-1">
-            <div className="h-[500px] rounded-2xl overflow-hidden shadow-2xl">
+          <div className=" order-2 lg:order-1 flex items-stretch">
+            <div className="w-full h-[80vh] rounded-2xl overflow-hidden shadow-2xl flex self-stretch">
               <Img
                 src="https://images.unsplash.com/photo-1769147555720-71fc71bfc216?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBob3NwaXRhbCUyMGJ1aWxkaW5nfGVufDF8fHx8MTc3NDA3ODY4N3ww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
                 alt="Modern hospital building"
-                className="w-full h-full  object-cover "           
+                className="w-full h-full  object-cover flex self-stretch"           
               />
             </div>
           </div>
