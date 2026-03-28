@@ -6,6 +6,9 @@ import Layout from "./Layout.jsx";
 import Home from "./Pages/Home.jsx";
 import HospitalSection from "./Pages/HospitalSection.jsx";
 import Services from "./Pages/Services.jsx";
+import ContectUs from "./Pages/ContectUs.jsx";
+import Login from "./Pages/Login.jsx";
+import PatientRegistrationForm from "./Pages/PatientRegistrationForm.jsx";
 
 const router = createBrowserRouter([
   {
@@ -18,13 +21,24 @@ const router = createBrowserRouter([
       },
       {
         path: "services",
-        element: <Services/>,
+        element: <Services />,
       },
       {
         path: "for-hospital",
         element: <HospitalSection />,
       },
-      
+      {
+        path: "contact",
+        element: <ContectUs />,
+      },
+      {
+        path: "login",
+        element: <Login />,
+      },
+      {
+        path: "register",
+        element: <PatientRegistrationForm />,
+      }
     ],
   },
 ]);

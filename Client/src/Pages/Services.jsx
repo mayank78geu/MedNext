@@ -70,7 +70,7 @@ const hospitalServices = [
     description: "View complete patient history and scheduled appointments.",
   },
   {
-    icon: CiCalendarDate ,
+    icon: CiCalendarDate,
     title: "Appointment Scheduling",
     description: "Manage and track all scheduled appointments in one place.",
   },
@@ -112,13 +112,12 @@ const Services = () => {
         </div>
       </div>
 
-      {/* Image */}
-      <div className="mt-20 rounded-2xl overflow-hidden shadow-2xl max-w-7xl mx-auto h-[500px]">
-        <Img
-          id="doctor-image"
-          src="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb2N0b3IlMjBwYXRpZW50JTIwY29uc3VsdGF0aW9ufGVufDF8fHx8MTc3NDA4NTI3NHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+      {/* Image */}  
+      <div className="mt-20 w-full max-w-7xl mx-auto rounded-2xl overflow-hidden shadow-2xl relative h-[500px]">
+        <img
+          src="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
           alt="Doctor"
-          className="w-full h-full object-cover "
+          className="absolute inset-0 w-full h-full object-cover"
         />
       </div>
 
@@ -147,7 +146,7 @@ const Services = () => {
       <div className="mt-25 max-w-7xl mx-auto px-4">
         <div className="flex items-center gap-3 mb-8">
           <div className="bg-purple-100 rounded-lg p-3">
-            <CiHospital1  className="size-6 text-purple-600"/>
+            <CiHospital1 className="size-6 text-purple-600" />
           </div>
           <h3 className="text-3xl font-bold text-gray-900">
             For Hospital Admins
