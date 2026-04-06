@@ -1,12 +1,15 @@
 import React from "react";
 import { IoSearchOutline } from "react-icons/io5";
 import Button from "../Component/Button/Button";
+import { useNavigate } from "react-router-dom";
 import { CiCalendar } from "react-icons/ci";
 const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center pt-16 bg-gradient-to-b from-blue-50 to-white">
+      className="relative min-h-screen flex items-center justify-center pt-16 bg-gradient-to-b from-blue-50 to-white"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-6">
@@ -21,7 +24,10 @@ const HeroSection = () => {
 
           {/* Quick Actions */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Button className="text-lg px-6 py-4 flex items-center gap-2 bg-blue-700 hover:bg-blue-600 text-white hover:text-white rounded-sm">
+            <Button
+              onClick={() => navigate("/find-doctors")}
+              className="text-lg px-6 py-4 flex items-center gap-2 bg-blue-700 hover:bg-blue-600 text-white hover:text-white rounded-sm"
+            >
               <IoSearchOutline className="text-xl size-5" />
               Find a Doctor
             </Button>
@@ -50,7 +56,6 @@ const HeroSection = () => {
         </div>
       </div>
     </section>
-    
   );
 };
 

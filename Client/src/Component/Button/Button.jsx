@@ -1,20 +1,8 @@
-// const Button = ({ text, className = "" }) => {
-//   return (
-//     <button
-//       className={`hover:text-sky-500 text-left cursor-pointer ${className}`}
-//     >
-//       {text}
-//     </button>
-    
-//   );
-// };
-
-// export default Button;
 import { IoSearchOutline } from "react-icons/io5";
 
-const Button = ({ text,children, className = "", ...props }) => {
+const Button = ({ text,children, onClick, className = "", ...props }) => {
   return (
-    <button
+    <button onClick={onClick}
       className={`hover:text-sky-500 text-left cursor-pointer ${className}`}
       {...props}
     >

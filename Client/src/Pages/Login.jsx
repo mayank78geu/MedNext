@@ -1,87 +1,121 @@
-import React from 'react'
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
+
+  //  State
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [error, setError] = useState("");
+
+  //  Handle input change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Handle login submit
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    const { email, password } = formData;
+
+    // Validation
+    if (!email || !password) {
+      setError("All fields are required ");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      setError("Enter valid email ");
+      return;
+    }
+
+    if (password.length < 4) {
+      setError("Password must be at least 4 characters ");
+      return;
+    }
+
+    // Dummy login check (replace with backend later)
+    if (email === "admin@gmail.com" && password === "1234") {
+      setError("");
+      alert("Login Successful ");
+
+      // redirect after login
+      navigate("/");
+    } else {
+      setError("Invalid email or password ");
+    }
+  };
+
   return (
-     <>
-      {/*
-        This example requires updating your template:
+    <div className="flex bg-gray-100 p-6 min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+      <div className="bg-white shadow max-w-[500px]  m-20 min-h-full mx-auto w-full p-10 rounded-xl bg-white">
 
-        ```
-        <html class="h-full bg-gray-900">
-        <body class="h-full">
-        ```
-      */}
-      <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <img
-            alt="Your Company"
-            src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-            className="mx-auto h-10 w-auto"
+        <h2 className="text-center text-2xl font-bold text-gray-700">
+          Sign in to your account
+        </h2>
+
+        <form onSubmit={handleLogin} className="mt-10 space-y-6">
+
+          {/* Email */}
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
           />
-          <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-500">Sign in to your account</h2>
-        </div>
 
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form action="#" method="POST" className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm/6 font-medium text-gray-600">
-                Email address
-              </label>
-              <div className="mt-2">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-gray outline-1 -outline-offset-1 outline-gray/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-                />
-              </div>
-            </div>
+          {/* Password */}
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          />
 
-            <div>
-              <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm/6 font-medium text-gray-600">
-                  Password
-                </label>
-                <div className="text-sm">
-                  <a href="#" className="font-semibold text-indigo-400 hover:text-indigo-300">
-                    Forgot password?
-                  </a>
-                </div>
-              </div>
-              <div className="mt-2">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  autoComplete="current-password"
-                  className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-gray outline-1 -outline-offset-1 outline-gray/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-                />
-              </div>
-            </div>
+          {/* Error Message */}
+          {error && (
+            <p className="text-red-500 text-sm text-center">{error}</p>
+          )}
 
-            <div>
-              <button
-                type="submit"
-                className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-              >
-                Sign in
-              </button>
-            </div>
-          </form>
+          {/* Buttons */}
+          <div className="flex gap-4">
 
-          <p className="mt-10 text-center text-sm/6 text-gray-400">
-            Not a member?{' '}
-            <a href="#" className="font-semibold text-indigo-400 hover:text-indigo-300">
-              Start a 14 day free trial
-            </a>
-          </p>
-        </div>
+            {/* Sign In */}
+            <button
+              type="submit"
+              className="w-full cursor-pointer bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600"
+            >
+              Sign In
+            </button>
+
+            {/* Sign Up */}
+            <button
+              type="button"
+              onClick={() => navigate("/register")}
+              className="w-full cursor-pointer bg-green-500 text-white py-2 rounded hover:bg-green-600"
+            >
+              Sign Up
+            </button>
+
+          </div>
+        </form>
       </div>
-    </>
-  )
-}
+    </div>
+  );
+};
 
-export default Login   
+export default Login;
