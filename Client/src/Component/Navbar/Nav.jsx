@@ -2,15 +2,6 @@ import { useState } from "react";
 import Button from "../Button/Button";
 import { Link, NavLink } from "react-router-dom";
 
-/* ---------------- Button ---------------- */
-// const Button = ({ text, className = "", ...props }) => {
-//   return (
-//     <button className={`cursor-pointer ${className}`} {...props}>
-//       {text}
-//     </button>
-//   );
-// };
-
 /* ---------------- Logo ---------------- */
 const Logo = () => {
   return (
@@ -132,16 +123,7 @@ const Nav = () => {
             Login
           </NavLink>
 
-          <NavLink
-            to="/register"
-            className={({ isActive }) =>
-              isActive
-                ? "bg-sky-500 text-white px-3 py-1 rounded-md"
-                : "text-sky-500 border border-sky-500 px-3 py-1 rounded-md"
-            }
-          >
-            Register
-          </NavLink>
+         
 
           {/* Mobile Button */}
           <button className="md:hidden text-2xl" onClick={() => setOpen(true)}>
