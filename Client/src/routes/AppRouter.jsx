@@ -1,5 +1,4 @@
 
-import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 
 // Layout
@@ -11,8 +10,10 @@ import HospitalSection from "../Pages/HospitalSection";
 import About from "../Pages/About";
 import ContectUs from "../Pages/ContectUs";
 import Login from "../Pages/Login";
-import PatientRegistrationForm from "../Pages/PatientRegistrationForm";
+import RegisterForm from "../Pages/RegisterForm";
 import FindDoctors from "../Pages/FindDoctors";
+import ProtectedRoute from "../Pages/ProtectedRoute";
+import DoctorDashboard from "../Pages/DoctorDashboard";
 
 const router = createBrowserRouter([
   {
@@ -24,9 +25,17 @@ const router = createBrowserRouter([
       { path: "for-hospital", element: <HospitalSection /> },
       { path: "contact", element: <ContectUs /> },
       { path: "login", element: <Login /> },
-      { path: "register", element: <PatientRegistrationForm /> },
-      { path: "find-doctors", element: <FindDoctors /> }, 
+      { path: "register", element: <RegisterForm /> },
+      { path: "find-doctors", element: <FindDoctors /> },
       { path: "about", element: <About /> },
+      {
+        path: "doctor-dashboard",
+        element: (
+          <ProtectedRoute>
+            <DoctorDashboard />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ]);
