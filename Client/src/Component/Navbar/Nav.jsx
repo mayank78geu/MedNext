@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import Button from "../Button/Button";
 
@@ -100,20 +100,35 @@ const MobileMenu = ({ open, setOpen }) => {
 /* ---------------- Nav ---------------- */
 const Nav = () => {
   const [open, setOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Simple Auth Check
-  const isLoggedIn = localStorage.getItem("doctorAuth");
+  // ✅ JWT Auth
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+  const name = localStorage.getItem("name");
+
+  const isLoggedIn = !!token;
 
   // Logout
   const handleLogout = () => {
-    localStorage.removeItem("doctorAuth");
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("name");
     navigate("/login");
   };
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = () => setDropdownOpen(false);
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
 
   return (
     <header className="w-full bg-white border border-sky-200 sticky top-0 z-50 shadow-sm">
       <nav className="flex items-center justify-between px-4 md:px-10 py-3">
+
         {/* Logo */}
         <Logo />
 
@@ -122,13 +137,53 @@ const Nav = () => {
 
         {/* Right Side */}
         <div className="flex gap-3 items-center">
+
           {isLoggedIn ? (
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 text-white px-3 py-1 rounded-md"
-            >
-              Logout
-            </button>
+            <div className="relative">
+
+              {/* Avatar */}
+              <div
+                onClick={(e) => {
+                  e.stopPropagation(); // prevent instant close
+                  setDropdownOpen(!dropdownOpen);
+                }}
+                className="w-10 h-10 rounded-full bg-sky-500 text-white flex items-center justify-center cursor-pointer font-bold"
+              >
+                {name ? name.charAt(0).toUpperCase() : role?.charAt(0)}
+              </div>
+
+              {/* Dropdown */}
+              {dropdownOpen && (
+                <div
+                  className="absolute right-0 mt-2 w-44 bg-white shadow-lg rounded-md border z-50"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="px-4 py-2 text-sm text-gray-500 border-b">
+                    {name || "User"} ({role})
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      navigate("/profile");
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                  >
+                    Profile
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <NavLink
               to="/login"
