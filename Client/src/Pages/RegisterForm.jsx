@@ -1,18 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { RegisterUser } from "../api/auth.api";
+import { toast } from "react-toastify";
 
 export default function PatientRegistrationForm() {
+
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
+    name: "",
     email: "",
-    phone: "",
+    password: "",
+    role: "PATIENT", // ✅ default role
   });
 
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Handle input
   const handleChange = (e) => {
@@ -25,10 +29,10 @@ export default function PatientRegistrationForm() {
   };
 
   // Submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.firstName || !form.lastName) {
+    if (!form.name.trim()) {
       setError("Enter full name");
       return;
     }
@@ -38,23 +42,49 @@ export default function PatientRegistrationForm() {
       return;
     }
 
-    if (!/^[0-9]{10}$/.test(form.phone)) {
-      setError("Enter valid 10 digit phone number");
+    if (!form.password || form.password.length < 6) {
+      setError("Password must be at least 6 characters");
       return;
     }
 
     setError("");
-    console.log("Form Data:", form);
-    setSubmitted(true);
+    setLoading(true);
+
+    try {
+      // ✅ SEND EXACT BACKEND FORMAT
+      const payload = {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: form.role, // PATIENT
+      };
+
+      const response = await RegisterUser(payload);
+
+      console.log("REGISTER RESPONSE:", response);
+
+      toast.success(response.message || "Registration Successful ✅");
+
+      setSubmitted(true);
+
+    } catch (err) {
+      console.log("ERROR:", err);
+
+      toast.error(err.message || "Registration failed");
+      setError(err.message || "Something went wrong");
+
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Reset
   const handleReset = () => {
     setForm({
-      firstName: "",
-      lastName: "",
+      name: "",
       email: "",
-      phone: "",
+      password: "",
+      role: "PATIENT",
     });
     setSubmitted(false);
   };
@@ -68,7 +98,7 @@ export default function PatientRegistrationForm() {
             Registration Successful ✅
           </h2>
           <p className="text-gray-600 mb-4">
-            Welcome {form.firstName}!
+            Welcome {form.name}!
           </p>
 
           <button
@@ -76,7 +106,7 @@ export default function PatientRegistrationForm() {
               handleReset();
               navigate("/login");
             }}
-            className="bg-blue-600 cursor-pointer text-white px-4 py-2 rounded"
+            className="bg-blue-600 text-white px-4 py-2 rounded"
           >
             Login Now
           </button>
@@ -95,20 +125,11 @@ export default function PatientRegistrationForm() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* First Name */}
+          {/* Name */}
           <input
-            name="firstName"
-            placeholder="First Name"
-            value={form.firstName}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-          />
-
-          {/* Last Name */}
-          <input
-            name="lastName"
-            placeholder="Last Name"
-            value={form.lastName}
+            name="name"
+            placeholder="Full Name"
+            value={form.name}
             onChange={handleChange}
             className="w-full border p-2 rounded"
           />
@@ -123,11 +144,12 @@ export default function PatientRegistrationForm() {
             className="w-full border p-2 rounded"
           />
 
-          {/* Phone */}
+          {/* Password */}
           <input
-            name="phone"
-            placeholder="Phone (10 digits)"
-            value={form.phone}
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password}
             onChange={handleChange}
             className="w-full border p-2 rounded"
           />
@@ -140,9 +162,10 @@ export default function PatientRegistrationForm() {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white cursor-pointer py-2 rounded hover:bg-blue-700"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
           >
-            Register
+            {loading ? "Registering..." : "Register"}
           </button>
 
         </form>

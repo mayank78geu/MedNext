@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { LoginUser } from "../api/auth.api";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -10,6 +12,7 @@ const Login = () => {
   });
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Handle input change
   const handleChange = (e) => {
@@ -22,7 +25,7 @@ const Login = () => {
   };
 
   // Handle login
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     const { email, password } = formData;
@@ -43,18 +46,44 @@ const Login = () => {
       return;
     }
 
-    // Clear previous auth
-    localStorage.removeItem("doctorAuth");
-    localStorage.removeItem("patientAuth");
-    localStorage.removeItem("hospitalAuth");
+    setError("");
+    setLoading(true);
 
-    // Simple login (you can customize)
-    if (email === "admin@gmail.com" && password === "1234") {
-      localStorage.setItem("doctorAuth", "true"); // treat as doctor
-      setError("");
-      navigate("/doctor-dashboard");
-    } else {
-      setError("Invalid email or password");
+    try {
+      // ✅ API CALL
+      const response = await LoginUser({ email, password });
+
+      console.log("LOGIN RESPONSE:", response);
+
+      // Expected response:
+      // { status, message, data: { token, role } }
+
+      const token = response.data.token;
+      const role = response.data.role;
+
+      // ✅ STORE TOKEN
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
+
+      toast.success("Login successful");
+
+      // ✅ ROLE BASED NAVIGATION
+      if (role === "DOCTOR") {
+        navigate("/doctor-dashboard");
+      } else if (role === "ADMIN") {
+        navigate("/admin-dashboard");
+      } else {
+        navigate("/patient-dashboard");
+      }
+
+    } catch (err) {
+      console.log("ERROR:", err);
+
+      toast.error(err.message || "Login failed");
+      setError(err.message || "Invalid email or password");
+
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -66,6 +95,7 @@ const Login = () => {
         </h2>
 
         <form onSubmit={handleLogin} className="space-y-5">
+          
           {/* Email */}
           <input
             type="email"
@@ -87,15 +117,18 @@ const Login = () => {
           />
 
           {/* Error */}
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          {error && (
+            <p className="text-red-500 text-sm text-center">{error}</p>
+          )}
 
           {/* Buttons */}
           <div className="flex flex-col gap-3">
             <button
               type="submit"
-              className="w-full bg-indigo-500 text-white py-2 cursor-pointer rounded hover:bg-indigo-600"
+              disabled={loading}
+              className="w-full bg-indigo-500 text-white py-2 rounded hover:bg-indigo-600 disabled:bg-gray-400"
             >
-              Sign In
+              {loading ? "Signing in..." : "Sign In"}
             </button>
 
             <Link

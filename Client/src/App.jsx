@@ -9,6 +9,7 @@ function App() {
     <>
       {/* <Nav /> */}
     </>
+    <h1>Hello WOrld</h1>
   );
 }
 
