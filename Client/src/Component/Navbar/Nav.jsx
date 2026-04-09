@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import Button from "../Button/Button";
-import { Link, NavLink } from "react-router-dom";
 
 /* ---------------- Logo ---------------- */
 const Logo = () => {
@@ -100,6 +100,16 @@ const MobileMenu = ({ open, setOpen }) => {
 /* ---------------- Nav ---------------- */
 const Nav = () => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // Simple Auth Check
+  const isLoggedIn = localStorage.getItem("doctorAuth");
+
+  // Logout
+  const handleLogout = () => {
+    localStorage.removeItem("doctorAuth");
+    navigate("/login");
+  };
 
   return (
     <header className="w-full bg-white border border-sky-200 sticky top-0 z-50 shadow-sm">
@@ -112,18 +122,25 @@ const Nav = () => {
 
         {/* Right Side */}
         <div className="flex gap-3 items-center">
-          <NavLink
-            to="/login"
-            className={({ isActive }) =>
-              isActive
-                ? "bg-sky-500 text-white px-3 py-1 rounded-md"
-                : "text-sky-500 border border-sky-500 px-3 py-1 rounded-md"
-            }
-          >
-            Login
-          </NavLink>
-
-         
+          {isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 text-white px-3 py-1 rounded-md"
+            >
+              Logout
+            </button>
+          ) : (
+            <NavLink
+              to="/login"
+              className={({ isActive }) =>
+                isActive
+                  ? "bg-sky-500 text-white px-3 py-1 rounded-md"
+                  : "text-sky-500 border border-sky-500 px-3 py-1 rounded-md"
+              }
+            >
+              Login
+            </NavLink>
+          )}
 
           {/* Mobile Button */}
           <button className="md:hidden text-2xl" onClick={() => setOpen(true)}>
