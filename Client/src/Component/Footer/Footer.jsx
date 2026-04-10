@@ -1,4 +1,5 @@
 import React from "react";
+import { HeartPulse } from "lucide-react";
 import { FaInstagram } from "react-icons/fa";
 import { CiTwitter } from "react-icons/ci";
 import { FaFacebook } from "react-icons/fa";
@@ -15,16 +16,12 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/*Brand*/}
           <div className="">
-            <div className="flex items-center gap-3">
-              <div className="flex ">
-                <img
-                  src="https://tailwindcss.com/plus-assets/img/logos/mark.svg"
-                  alt="logo"
-                  className="h-8 "
-                />
+            <Link to="/" className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+              <div className="flex">
+                <HeartPulse className="h-8 w-8 text-sky-500" />
               </div>
               <span className="text-2xl font-bold text-sky-500">MedNext</span>
-            </div>
+            </Link>
             <p className="text-gray-400 mb-4">
               Connecting patients with quality healthcare providers for a
               healthier tomorrow.
