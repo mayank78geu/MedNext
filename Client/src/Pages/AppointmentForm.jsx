@@ -45,13 +45,13 @@ const AppointmentForm = ({ doctorName, onClose }) => {
       className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
       onClick={onClose} // click outside close
     >
-      
+
       {/* Modal Box */}
       <div
         className="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl transform transition-all duration-300 scale-100"
         onClick={(e) => e.stopPropagation()} // prevent close
       >
-        
+
         <h2 className="text-xl font-bold mb-4 text-center">
           Book Appointment
         </h2>
@@ -61,7 +61,7 @@ const AppointmentForm = ({ doctorName, onClose }) => {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          
+
           <input
             type="text"
             name="name"

@@ -93,7 +93,7 @@ export default function PatientRegistrationForm() {
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-green-50">
-        <div className="bg-white p-8 rounded-xl shadow text-center">
+        <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 text-center">
           <h2 className="text-2xl font-bold text-green-600 mb-4">
             Registration Successful ✅
           </h2>
@@ -106,7 +106,7 @@ export default function PatientRegistrationForm() {
               handleReset();
               navigate("/login");
             }}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
+            className="inline-block mt-4 bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-300"
           >
             Login Now
           </button>
@@ -117,7 +117,7 @@ export default function PatientRegistrationForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-      <div className="bg-white w-full max-w-lg p-8 rounded-xl shadow">
+      <div className="bg-white w-full max-w-lg p-8 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
 
         <h1 className="text-2xl font-bold text-center mb-6">
           Registration
@@ -131,7 +131,7 @@ export default function PatientRegistrationForm() {
             placeholder="Full Name"
             value={form.name}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all duration-300"
           />
 
           {/* Email */}
@@ -141,7 +141,7 @@ export default function PatientRegistrationForm() {
             placeholder="Email"
             value={form.email}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all duration-300"
           />
 
           {/* Password */}
@@ -151,7 +151,7 @@ export default function PatientRegistrationForm() {
             placeholder="Password"
             value={form.password}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="w-full border border-gray-300 p-3 rounded-lg focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all duration-300"
           />
 
           {/* Error */}
@@ -163,7 +163,7 @@ export default function PatientRegistrationForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
+            className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 disabled:bg-gray-400 hover:shadow-lg hover:scale-[1.02] active:scale-95 transition-all duration-300"
           >
             {loading ? "Registering..." : "Register"}
           </button>

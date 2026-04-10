@@ -1,20 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import Button from "../Button/Button";
-
-/* ---------------- Logo ---------------- */
-const Logo = () => {
-  return (
-    <div className="flex items-center gap-2">
-      <img
-        src="https://tailwindcss.com/plus-assets/img/logos/mark.svg"
-        alt="logo"
-        className="h-8"
-      />
-      <span className="font-bold text-xl text-[#0c1a2e]">MedNext</span>
-    </div>
-  );
-};
+import Logo from "./Logo";
 
 /* ---------------- Desktop Menu ---------------- */
 const DesktopMenu = () => {
@@ -126,7 +113,7 @@ const Nav = () => {
   }, []);
 
   return (
-    <header className="w-full bg-white border border-sky-200 sticky top-0 z-50 shadow-sm">
+    <header className="w-full bg-white/60 backdrop-blur-md border-b border-sky-200/50 sticky top-0 z-50 shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-all duration-300">
       <nav className="flex items-center justify-between px-4 md:px-10 py-3">
 
         {/* Logo */}

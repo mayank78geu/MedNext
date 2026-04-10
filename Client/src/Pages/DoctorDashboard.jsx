@@ -132,17 +132,17 @@ export default function DoctorDashboard() {
         </div>
 
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white p-4 rounded border">
+          <div className="bg-white p-4 rounded border hover:-translate-y-1 hover:shadow-md transition-all duration-300 cursor-pointer">
             <p className="text-sm text-gray-400">Today's appointments</p>
             <h2 className="text-2xl font-bold">{todayList.length}</h2>
           </div>
 
-          <div className="bg-white p-4 rounded border">
+          <div className="bg-white p-4 rounded border hover:-translate-y-1 hover:shadow-md transition-all duration-300 cursor-pointer">
             <p className="text-sm text-gray-400">Completed</p>
             <h2 className="text-2xl font-bold">{doneCount}</h2>
           </div>
 
-          <div className="bg-white p-4 rounded border">
+          <div className="bg-white p-4 rounded border hover:-translate-y-1 hover:shadow-md transition-all duration-300 cursor-pointer">
             <p className="text-sm text-gray-400">Pending</p>
             <h2 className="text-2xl font-bold">{pendingList.length}</h2>
           </div>
@@ -158,7 +158,7 @@ export default function DoctorDashboard() {
             </div>
 
             {todayList.map((a) => (
-              <div key={a.id} className="flex justify-between items-center p-4 border-b">
+              <div key={a.id} className="flex justify-between items-center p-4 border-b group hover:bg-slate-50 transition-colors duration-200">
 
                 <div>
                   <p className={`font-medium ${a.status === "done" ? "line-through text-gray-400" : ""}`}>
@@ -178,7 +178,7 @@ export default function DoctorDashboard() {
                   {a.status !== "done" && (
                     <button
                       onClick={() => markDone(a.id)}
-                      className="text-green-600 border px-2 py-1 rounded"
+                      className="text-green-600 border px-2 py-1 rounded hover:bg-green-50 active:scale-95 transition-all"
                     >
                       ✓
                     </button>
@@ -198,7 +198,7 @@ export default function DoctorDashboard() {
               <p className="p-4 text-gray-400">No pending requests</p>
             ) : (
               pendingList.map((a) => (
-                <div key={a.id} className="p-4 border-b">
+                <div key={a.id} className="p-4 border-b group hover:bg-slate-50 transition-colors duration-200">
 
                   <p className="font-medium">{a.name}</p>
 
@@ -209,14 +209,14 @@ export default function DoctorDashboard() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => acceptPending(a.id)}
-                      className="bg-green-100 text-green-600 px-3 py-1 rounded"
+                      className="bg-green-100 text-green-600 px-3 py-1 rounded hover:bg-green-200 hover:shadow-md active:scale-95 transition-all"
                     >
                       Accept
                     </button>
 
                     <button
                       onClick={() => rejectPending(a.id)}
-                      className="border px-3 py-1 rounded text-gray-400"
+                      className="border px-3 py-1 rounded text-gray-400 hover:bg-red-50 hover:text-red-500 hover:border-red-200 active:scale-95 transition-all"
                     >
                       Decline
                     </button>

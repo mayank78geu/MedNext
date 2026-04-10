@@ -1,3 +1,4 @@
+
 import React from "react";
 import { IoSearchOutline } from "react-icons/io5";
 import Button from "../Component/Button/Button";
@@ -26,13 +27,13 @@ const HeroSection = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <Button
               onClick={() => navigate("/find-doctors")}
-              className="text-lg px-6 py-4 flex items-center gap-2 bg-blue-700 hover:bg-blue-600 text-white hover:text-white rounded-sm"
+              className="text-lg px-6 py-4 flex items-center gap-2 bg-blue-700 hover:bg-blue-600 text-white hover:text-white rounded-sm transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
             >
               <IoSearchOutline className="text-xl size-5" />
               Find a Doctor
             </Button>
 
-            <Button className="text-lg px-8 py-4 flex items-center border-2 border-blue-600 text-blue-600 hover:text-black rounded-sm">
+            <Button className="text-lg px-8 py-4 flex items-center border-2 border-blue-600 text-blue-600 hover:text-black rounded-sm transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl hover:bg-blue-50">
               <CiCalendar className="mr-2 size-5" />
               Book Appointment
             </Button>
@@ -40,15 +41,15 @@ const HeroSection = () => {
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className="bg-white rounded-2xl p-6 shadow-lg hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 cursor-pointer">
               <div className="text-4xl font-bold text-blue-600 mb-2">500+</div>
               <div className="text-gray-600">Verified Doctors</div>
             </div>
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className="bg-white rounded-2xl p-6 shadow-lg hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 cursor-pointer">
               <div className="text-4xl font-bold text-blue-600 mb-2">100+</div>
               <div className="text-gray-600">Partner Hospitals</div>
             </div>
-            <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <div className="bg-white rounded-2xl p-6 shadow-lg hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 cursor-pointer">
               <div className="text-4xl font-bold text-blue-600 mb-2">50K+</div>
               <div className="text-gray-600">Happy Patients</div>
             </div>

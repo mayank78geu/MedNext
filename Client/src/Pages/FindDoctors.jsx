@@ -1,51 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
 // import ServiceCard from "../Component/Card/ServiceCard";
 import Doctors from "../Component/Card/Doctors";
-
-// Dummy doctor data
-const doctors = [
-  {
-    name: "Dr. Sharma",
-    disease: "fever",
-    location: "delhi",
-    specialization: "General Physician",
-  },
-  {
-    name: "Dr. Verma",
-    disease: "heart",
-    location: "mumbai",
-    specialization: "Cardiologist",
-  },
-  {
-    name: "Dr. Khan",
-    disease: "skin",
-    location: "delhi",
-    specialization: "Dermatologist",
-  },
-  {
-    name: "Dr. Singh",
-    disease: "diabetes",
-    location: "dehradun",
-    specialization: "Endocrinologist",
-  },
-];
+import { FindDoctor } from "../api/finddoc.api";
 
 const FindDoctors = () => {
   const [disease, setDisease] = useState("");
   const [location, setLocation] = useState("");
+  const [doctors, setDoctors] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDoctorsData = async () => {
+      try {
+        const data = await FindDoctor();
+        if (Array.isArray(data)) {
+          setDoctors(data);
+        } else {
+          setDoctors([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch doctors:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDoctorsData();
+  }, []);
 
   // Filter logic
   const filteredDoctors = doctors.filter((doc) => {
+    const docDisease = doc.specialization || "";
+    const docLocation = doc.hospital?.city || doc.hospital?.address || "";
     return (
-      doc.disease.toLowerCase().includes(disease.toLowerCase()) &&
-      doc.location.toLowerCase().includes(location.toLowerCase())
+      docDisease.toLowerCase().includes(disease.toLowerCase()) &&
+      docLocation.toLowerCase().includes(location.toLowerCase())
     );
   });
 
   return (
     <section className="py-20 bg-white">
-      
+
       {/* Heading */}
       <div className="text-center mb-10">
         <h1 className="text-3xl font-bold">Find Doctors</h1>
@@ -84,15 +80,19 @@ const FindDoctors = () => {
 
       {/* Results */}
       <div className="max-w-7xl mx-auto mt-10 grid md:grid-cols-3 gap-6">
-        
-        {filteredDoctors.length > 0 ? (
+
+        {isLoading ? (
+          <p className="text-center col-span-full text-gray-500">
+            Loading doctors...
+          </p>
+        ) : filteredDoctors.length > 0 ? (
           filteredDoctors.map((doc, index) => (
             <Doctors
               key={index}
               icon={FaSearch}
               title={doc.name}
-              disease={doc.disease}
-              description={`${doc.specialization} - ${doc.location}`}
+              disease={doc.specialization || "General"}
+              description={`${doc.experience || 0} years exp - ${doc.hospital?.name || "Independent"} (${doc.hospital?.city || "Remote"})`}
             />
           ))
         ) : (
