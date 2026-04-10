@@ -12,7 +12,7 @@ Server/*.class
 Server/.mvn/
 
 # Credentials - NEVER commit this
-Server/src/main/resources/application.properties
+# Server/src/main/resources/application.properties
 
 # Editor
 .vscode/
