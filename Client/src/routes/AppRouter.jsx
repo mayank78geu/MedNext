@@ -13,7 +13,13 @@ import Login from "../Pages/Login";
 import RegisterForm from "../Pages/RegisterForm";
 import FindDoctors from "../Pages/FindDoctors";
 import ProtectedRoute from "../Pages/ProtectedRoute";
-import DoctorDashboard from "../Pages/DoctorDashboard";
+// Doctor Dashboard Pages
+import DoctorDashboardLayout from "../Layouts/DoctorDashboardLayout";
+import DoctorHome from "../Pages/Doctor/DoctorHome";
+import PatientView from "../Pages/Doctor/PatientView";
+import Schedule from "../Pages/Doctor/Schedule";
+import History from "../Pages/Doctor/History";
+import DoctorProfile from "../Pages/Doctor/Profile";
 import PatientDashboard from "../Pages/PatientDashboard";
 import HospitalDashboard from "../Pages/HospitalDashboard";
 import PatientDashboardLayout from "../Layouts/PatientDashboardLayout";
@@ -36,14 +42,6 @@ const router = createBrowserRouter([
       { path: "find-doctors", element: <FindDoctors /> },
       { path: "about", element: <About /> },
       { path: "hospital-dashboard", element: <HospitalDashboard /> },
-      {
-        path: "doctor-dashboard",
-        element: (
-          <ProtectedRoute>
-            <DoctorDashboard />
-          </ProtectedRoute>
-        ),
-      },
     ],
   },
   {
@@ -56,6 +54,18 @@ const router = createBrowserRouter([
       { path: "appointments", element: <Appointments /> },
       { path: "details", element: <PatientDetails /> },
       { path: "profile", element: <Profile /> },
+      { path: "hospital-dashboard", element: <HospitalDashboard /> },
+    ]
+  },
+  {
+    path: "/doctor-dashboard",
+    element: <ProtectedRoute><DoctorDashboardLayout /></ProtectedRoute>,
+    children: [
+      { index: true, element: <DoctorHome /> },
+      { path: "patient-view", element: <PatientView /> },
+      { path: "schedule", element: <Schedule /> },
+      { path: "history", element: <History /> },
+      { path: "profile", element: <DoctorProfile /> },
     ]
   }
 ]);

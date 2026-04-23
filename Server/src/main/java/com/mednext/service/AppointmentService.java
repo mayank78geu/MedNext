@@ -5,6 +5,7 @@ import com.mednext.entity.Appointment;
 import com.mednext.repository.AppointmentRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -45,4 +46,7 @@ public class AppointmentService {
     public List<Appointment> getByDoctor(Long doctorId) {
         return appointmentRepository.findByDoctorId(doctorId);
     }
+
+    //GET BY DATE
+    public List<Appointment> getByDate(LocalDate date) {return appointmentRepository.findByDate(date);}
 }

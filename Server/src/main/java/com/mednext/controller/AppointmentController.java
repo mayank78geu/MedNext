@@ -8,6 +8,7 @@ import com.mednext.repository.UserRepository;
 import com.mednext.entity.User;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -35,6 +36,12 @@ public class AppointmentController {
     @GetMapping("/patient/{patientId}")
     public List<Appointment> getByPatient(@PathVariable Long patientId) {
         return appointmentService.getByPatient(patientId);
+    }
+
+    //GET BY DATE
+    @GetMapping("/date")
+    public List<Appointment> getByDate(@RequestParam LocalDate date) {
+        return appointmentService.getByDate(date);
     }
 
     // GET BY LOGGED-IN PATIENT (JWT Extracted)
