@@ -95,7 +95,7 @@ const Login = () => {
         </h2>
 
         <form onSubmit={handleLogin} className="space-y-5">
-          
+
           {/* Email */}
           <input
             type="email"

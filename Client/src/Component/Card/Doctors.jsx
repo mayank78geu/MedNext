@@ -1,61 +1,43 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import Button from "../Button/Button";
 import AppointmentForm from "../../Pages/AppointmentForm";
 
-const Doctors = ({ icon: Icon, title, description, disease }) => {
-  const [showForm, setShowForm] = useState(false);
+const Doctors = ({ title, disease, description, buttonText = "Book Appointment" }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Scroll lock + scrollbar fix
-
-  useEffect(() => {
-    if (showForm) {
-      const scrollbarWidth =
-        window.innerWidth - document.documentElement.clientWidth;
-
-      document.body.style.overflow = "hidden";
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    } else {
-      document.body.style.overflow = "auto";
-      document.body.style.paddingRight = "0px";
-    }
-
-    return () => {
-      document.body.style.overflow = "auto";
-      document.body.style.paddingRight = "0px";
-    };
-  }, [showForm]);
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full hover:shadow-lg ">
-      {/* Icon */}
-      <div className="bg-blue-100 rounded-xl w-12 h-12 flex items-center justify-center mb-5">
-        {Icon && <Icon className="text-blue-600 size-6" />}
+    <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between hover:shadow-xl transition-all duration-300">
+      <div className="mb-6">
+        <h3 className="text-2xl font-bold text-slate-800 mb-2">{title}</h3>
+        <p className="text-blue-600 font-bold text-sm uppercase tracking-wide mb-4">{disease}</p>
+        <p className="text-slate-500 leading-relaxed font-medium">
+          {description || "Experienced specialist dedicated to providing top-quality healthcare through MedNext's verified network."}
+        </p>
       </div>
 
-      {/* Name */}
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">{title}</h3>
+      <Button
+        onClick={openModal}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 px-6 rounded-xl transition-all duration-300 uppercase text-xs tracking-widest"
+      >
+        {buttonText}
+      </Button>
 
-      {/* Disease */}
-      <p className="text-sm text-blue-600 mb-2 capitalize">Treats: {disease}</p>
-
-      {/* Description */}
-      <p className="text-gray-500 leading-relaxed">{description}</p>
-
-      {/* Button */}
-      <div className="mt-4">
-        <button
-          onClick={() => setShowForm(true)}
-          className="w-full bg-blue-600 cursor-pointer text-white py-2 rounded-lg hover:bg-blue-700 cursor-pointer transition"
-        >
-          Book Appointment
-        </button>
-      </div>
-
-      {/* Popup */}
-      {showForm && (
-        <AppointmentForm
-          doctorName={title}
-          onClose={() => setShowForm(false)}
-        />
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+           {/* Modal Overlay Background */}
+           <div 
+             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fadeIn" 
+             onClick={closeModal}
+           ></div>
+           
+           {/* The actual Modal Component */}
+           <div className="relative animate-scaleIn w-full max-w-2xl">
+              <AppointmentForm doctorName={title} onClose={closeModal} />
+           </div>
+        </div>
       )}
     </div>
   );
