@@ -195,7 +195,7 @@ function PatientDashboard() {
                                 </div>
                             </div>
                             <button 
-                                onClick={() => navigate("/find-doctors")}
+                                onClick={() => navigate("/patient-dashboard/find-doctors")}
                                 className="bg-slate-900 text-white px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all active:scale-95 shadow-xl shadow-slate-200"
                             >
                                 Book New
