@@ -36,4 +36,19 @@ public class DoctorController {
     public List<Doctor> searchBySpecialization(@RequestParam String specialization) {
         return doctorService.searchBySpecialization(specialization);
     }
+
+    @PostMapping
+    public Doctor createDoctor(@RequestBody Doctor doctor) {
+        return doctorService.createDoctor(doctor);
+    }
+
+    @PutMapping("/{id}")
+    public Doctor updateDoctor(@PathVariable Long id, @RequestBody Doctor doctorDetails) {
+        return doctorService.updateDoctor(id, doctorDetails);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteDoctor(@PathVariable Long id) {
+        doctorService.deleteDoctor(id);
+    }
 }
