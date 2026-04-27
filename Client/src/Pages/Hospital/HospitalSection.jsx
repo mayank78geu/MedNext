@@ -1,7 +1,7 @@
 import React from "react";
-import Img from "../Component/Photos/Img";
+import Img from "../../Component/Photos/Img";
 import { FaArrowRight } from "react-icons/fa";
-import Button from "../Component/Button/Button";
+import Button from "../../Component/Button/Button";
 import { FiCheckCircle } from "react-icons/fi";
 import { Link } from "react-router-dom";
 

@@ -26,18 +26,7 @@ const Doctors = ({ title, disease, description, buttonText = "Book Appointment" 
       </Button>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-           {/* Modal Overlay Background */}
-           <div 
-             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fadeIn" 
-             onClick={closeModal}
-           ></div>
-           
-           {/* The actual Modal Component */}
-           <div className="relative animate-scaleIn w-full max-w-2xl">
-              <AppointmentForm doctorName={title} onClose={closeModal} />
-           </div>
-        </div>
+        <AppointmentForm doctorName={title} onClose={closeModal} />
       )}
     </div>
   );

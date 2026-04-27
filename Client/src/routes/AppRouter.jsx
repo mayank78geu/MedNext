@@ -1,32 +1,45 @@
 
 import { createBrowserRouter } from "react-router-dom";
 
-// Layout
+// Layouts
 import Layout from "../Layout";
-// Pages
+import DoctorDashboardLayout from "../Layouts/DoctorDashboardLayout";
+import PatientDashboardLayout from "../Layouts/PatientDashboardLayout";
+import HospitalDashboardLayout from "../Layouts/HospitalDashboardLayout";
+
+// Core Pages
 import Home from "../Pages/Home";
 import Services from "../Pages/Services";
-import HospitalSection from "../Pages/HospitalSection";
+import HospitalSection from "../Pages/Hospital/HospitalSection";
 import About from "../Pages/About";
 import ContactUs from "../Pages/ContactUs";
 import Login from "../Pages/Login";
 import RegisterForm from "../Pages/RegisterForm";
 import FindDoctors from "../Pages/FindDoctors";
 import ProtectedRoute from "../Pages/ProtectedRoute";
+
 // Doctor Dashboard Pages
-import DoctorDashboardLayout from "../Layouts/DoctorDashboardLayout";
 import DoctorHome from "../Pages/Doctor/DoctorHome";
 import PatientView from "../Pages/Doctor/PatientView";
 import Schedule from "../Pages/Doctor/Schedule";
 import History from "../Pages/Doctor/History";
 import DoctorProfile from "../Pages/Doctor/Profile";
+
+// Patient Dashboard Pages
 import PatientDashboard from "../Pages/PatientDashboard";
-import HospitalDashboard from "../Pages/HospitalDashboard";
-import PatientDashboardLayout from "../Layouts/PatientDashboardLayout";
 import Prescriptions from "../Pages/Patient/Prescriptions";
 import Appointments from "../Pages/Patient/Appointments";
 import PatientDetails from "../Pages/Patient/PatientDetails";
 import Profile from "../Pages/Patient/Profile";
+
+// Hospital Dashboard Pages
+import HospitalDashboard from "../Pages/Hospital/HospitalDashboard";
+import HospitalAppointments from "../Pages/Hospital/Appointments";
+import HospitalPatients from "../Pages/Hospital/Patients";
+import HospitalProfile from "../Pages/Hospital/Profile";
+import HospitalDoctors from "../Pages/Hospital/Doctors";
+import HospitalStaff from "../Pages/Hospital/Staff";
+import HospitalReports from "../Pages/Hospital/Reports";
 
 const router = createBrowserRouter([
   {
@@ -41,7 +54,6 @@ const router = createBrowserRouter([
       { path: "register", element: <RegisterForm /> },
       { path: "find-doctors", element: <FindDoctors /> },
       { path: "about", element: <About /> },
-      { path: "hospital-dashboard", element: <HospitalDashboard /> },
     ],
   },
   {
@@ -65,6 +77,19 @@ const router = createBrowserRouter([
       { path: "schedule", element: <Schedule /> },
       { path: "history", element: <History /> },
       { path: "profile", element: <DoctorProfile /> },
+    ]
+  },
+  {
+    path: "/hospital-dashboard",
+    element: <ProtectedRoute><HospitalDashboardLayout /></ProtectedRoute>,
+    children: [
+      { index: true, element: <HospitalDashboard /> },
+      { path: "appointments", element: <HospitalAppointments /> },
+      { path: "patients", element: <HospitalPatients /> },
+      { path: "doctors", element: <HospitalDoctors /> },
+      { path: "staff", element: <HospitalStaff /> },
+      { path: "reports", element: <HospitalReports /> },
+      { path: "profile", element: <HospitalProfile /> },
     ]
   }
 ]);

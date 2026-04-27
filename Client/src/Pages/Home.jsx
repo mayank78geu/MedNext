@@ -1,6 +1,6 @@
 import React from "react";
 import HeroSection from "./HeroSection";
-import HospitalSection from "./HospitalSection";
+import HospitalSection from "./Hospital/HospitalSection";
 import Services from "./Services";
 
 
