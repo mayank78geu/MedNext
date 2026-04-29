@@ -24,6 +24,15 @@ public class PatientService {
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
     }
 
+    /**
+     * Returns null when no patient record exists for this userId
+     * (instead of throwing, which causes a 500 error).
+     */
+    public Patient findPatientByUserId(Long userId) {
+        return patientRepository.findByUserId(userId).orElse(null);
+    }
+
+    /** Kept for backward compatibility — throws if not found. */
     public Patient getPatientByUserId(Long userId) {
         return patientRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Patient not found for user"));
@@ -35,7 +44,7 @@ public class PatientService {
 
     public Patient updatePatient(Long id, Patient patientDetails) {
         Patient patient = getPatientById(id);
-        
+
         if (patientDetails.getName() != null) patient.setName(patientDetails.getName());
         if (patientDetails.getCity() != null) patient.setCity(patientDetails.getCity());
         if (patientDetails.getPincode() != null) patient.setPincode(patientDetails.getPincode());
