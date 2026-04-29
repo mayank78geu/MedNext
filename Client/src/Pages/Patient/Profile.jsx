@@ -32,12 +32,16 @@ const Field = ({ icon: Icon, label, name, type = "text", value, onChange, disabl
   </div>
 );
 
+const DEFAULTS = {
+  name: "", city: "", pincode: "", age: "",
+  height: "", weight: "", stressLevel: "moderate",
+  averageSleepTime: "", sleepQuality: "moderate", bpIssues: "n"
+};
+
+const isProfileIncomplete = (d) => !d.city || !d.pincode || !d.age || !d.height || !d.weight;
+
 const Profile = () => {
-  const [patient, setPatient] = useState({
-    name: "", city: "", pincode: "", age: "",
-    height: "", weight: "", stressLevel: "moderate",
-    averageSleepTime: "", sleepQuality: "moderate", bpIssues: "n"
-  });
+  const [patient, setPatient] = useState(DEFAULTS);
   const [userEmail, setUserEmail] = useState("");
   const [userId, setUserId] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -45,33 +49,59 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [showCompleteProfileModal, setShowCompleteProfileModal] = useState(false);
 
-  const isProfileIncomplete = (d) => !d.city || !d.pincode || !d.age || !d.height || !d.weight;
-
+  // ─── Load profile on mount ─────────────────────────────────────────────────
   useEffect(() => {
     (async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
+
         const payload = JSON.parse(atob(token.split(".")[1]));
         const email = payload.sub;
         setUserEmail(email);
+
+        // Step 1: resolve userId from email
         const userData = await GetUserByEmail(email);
-        const uid = userData.data.id;
+        const uid = userData?.data?.id ?? userData?.id;
+        if (!uid) throw new Error("Could not resolve user ID");
         setUserId(uid);
-        const pd = await GetPatientByUserId(uid);
-        if (pd) {
-          setPatient({
-            name: pd.name || "",  city: pd.city || "",  pincode: pd.pincode || "",
-            age: pd.age || "",  height: pd.height || "",  weight: pd.weight || "",
-            stressLevel: pd.stressLevel || "moderate",
-            averageSleepTime: pd.averageSleepTime || "",
-            sleepQuality: pd.sleepQuality || "moderate",
-            bpIssues: pd.bpIssues || "n"
-          });
-          if (isProfileIncomplete(pd)) setShowCompleteProfileModal(true);
+
+        // Step 2: fetch patient record (may be null if never saved before)
+        try {
+          const pd = await GetPatientByUserId(uid);
+          if (pd) {
+            const merged = {
+              name:             pd.name             ?? "",
+              city:             pd.city             ?? "",
+              pincode:          pd.pincode          ?? "",
+              age:              pd.age              ?? "",
+              height:           pd.height           ?? "",
+              weight:           pd.weight           ?? "",
+              stressLevel:      pd.stressLevel      ?? "moderate",
+              averageSleepTime: pd.averageSleepTime ?? "",
+              sleepQuality:     pd.sleepQuality     ?? "moderate",
+              bpIssues:         pd.bpIssues         ?? "n",
+            };
+            setPatient(merged);
+            if (isProfileIncomplete(merged)) setShowCompleteProfileModal(true);
+          } else {
+            // No patient record at all — prompt to complete profile
+            setShowCompleteProfileModal(true);
+          }
+        } catch (patientErr) {
+          // 404 = patient record does not exist yet; anything else is a real error
+          const status = patientErr?.status ?? patientErr?.response?.status;
+          if (status === 404) {
+            setShowCompleteProfileModal(true);
+          } else {
+            toast.error("Failed to load medical profile.");
+          }
         }
-      } catch { toast.error("Failed to load profile."); }
-      finally { setLoading(false); }
+      } catch (err) {
+        toast.error("Failed to load profile.");
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
@@ -81,11 +111,50 @@ const Profile = () => {
     setSaving(true);
     try {
       if (!userId) throw new Error("Missing user ID");
-      await UpdatePatientByUserId(userId, patient);
+
+      // Build a clean payload — convert numeric strings to numbers where needed
+      const payload = {
+        name:             patient.name             || null,
+        city:             patient.city             || null,
+        pincode:          patient.pincode          || null,
+        age:              patient.age    !== "" ? Number(patient.age)    : null,
+        height:           patient.height !== "" ? Number(patient.height) : null,
+        weight:           patient.weight !== "" ? Number(patient.weight) : null,
+        stressLevel:      patient.stressLevel      || null,
+        averageSleepTime: patient.averageSleepTime !== "" ? String(patient.averageSleepTime) : null,
+        sleepQuality:     patient.sleepQuality     || null,
+        bpIssues:         patient.bpIssues         || null,
+      };
+
+      const saved = await UpdatePatientByUserId(userId, payload);
+
+      // Refresh local state from the response so UI stays in sync
+      if (saved) {
+        const refreshed = {
+          name:             saved.name             ?? patient.name,
+          city:             saved.city             ?? patient.city,
+          pincode:          saved.pincode          ?? patient.pincode,
+          age:              saved.age              ?? patient.age,
+          height:           saved.height           ?? patient.height,
+          weight:           saved.weight           ?? patient.weight,
+          stressLevel:      saved.stressLevel      ?? patient.stressLevel,
+          averageSleepTime: saved.averageSleepTime ?? patient.averageSleepTime,
+          sleepQuality:     saved.sleepQuality     ?? patient.sleepQuality,
+          bpIssues:         saved.bpIssues         ?? patient.bpIssues,
+        };
+        setPatient(refreshed);
+      }
+
       setIsEditing(false);
+      // Dismiss the modal if profile is now complete
+      if (!isProfileIncomplete(patient)) setShowCompleteProfileModal(false);
       toast.success("Medical profile synchronized.");
-    } catch { toast.error("Failed to update profile."); }
-    finally { setSaving(false); }
+    } catch (err) {
+      console.error("Profile save error:", err);
+      toast.error("Failed to update profile. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -172,40 +241,40 @@ const Profile = () => {
               <Activity size={16} />
             </div>
             <div>
-              <h3 className="text-sm font-black text-white uppercase tracking-tight">Medical & Location Demographics</h3>
+              <h3 className="text-sm font-black text-white uppercase tracking-tight">Medical &amp; Location Demographics</h3>
               <p className="text-[10px] text-slate-500 mt-0.5">{isEditing ? "Edit mode active — changes will be saved on submit" : "Click Edit Profile to modify your details"}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <Field icon={User}      label="Full Name"          name="name"             value={patient.name}             onChange={handleChange} disabled={!isEditing} placeholder="Legal full name" />
-            <Field icon={MapPin}    label="City"               name="city"             value={patient.city}             onChange={handleChange} disabled={!isEditing} placeholder="e.g. Mumbai" />
-            <Field icon={Hash}      label="Pincode"            name="pincode"          value={patient.pincode}          onChange={handleChange} disabled={!isEditing} placeholder="e.g. 400001" />
-            <Field icon={UserCircle} label="Age"               name="age"   type="number" value={patient.age}          onChange={handleChange} disabled={!isEditing} placeholder="e.g. 25" />
-            <Field icon={Ruler}     label="Height (cm)"        name="height" type="number" value={patient.height}      onChange={handleChange} disabled={!isEditing} placeholder="e.g. 175" />
-            <Field icon={Weight}    label="Weight (kg)"        name="weight" type="number" value={patient.weight}      onChange={handleChange} disabled={!isEditing} placeholder="e.g. 70" />
+            <Field icon={User}      label="Full Name"      name="name"             value={patient.name}             onChange={handleChange} disabled={!isEditing} placeholder="Legal full name" />
+            <Field icon={MapPin}    label="City"           name="city"             value={patient.city}             onChange={handleChange} disabled={!isEditing} placeholder="e.g. Mumbai" />
+            <Field icon={Hash}      label="Pincode"        name="pincode"          value={patient.pincode}          onChange={handleChange} disabled={!isEditing} placeholder="e.g. 400001" />
+            <Field icon={UserCircle} label="Age"           name="age"   type="number" value={patient.age}           onChange={handleChange} disabled={!isEditing} placeholder="e.g. 25" />
+            <Field icon={Ruler}     label="Height (cm)"    name="height" type="number" value={patient.height}       onChange={handleChange} disabled={!isEditing} placeholder="e.g. 175" />
+            <Field icon={Weight}    label="Weight (kg)"    name="weight" type="number" value={patient.weight}       onChange={handleChange} disabled={!isEditing} placeholder="e.g. 70" />
 
-            <Field icon={Heart}     label="Stress Level"       name="stressLevel"      value={patient.stressLevel}      onChange={handleChange} disabled={!isEditing}>
+            <Field icon={Heart}     label="Stress Level"   name="stressLevel"      value={patient.stressLevel}      onChange={handleChange} disabled={!isEditing}>
               <select name="stressLevel" value={patient.stressLevel} onChange={handleChange} disabled={!isEditing}
                 className="w-full bg-transparent outline-none text-sm font-bold text-white disabled:cursor-not-allowed">
-                <option value="low" className="bg-[#0f172a]">Low</option>
+                <option value="low"      className="bg-[#0f172a]">Low</option>
                 <option value="moderate" className="bg-[#0f172a]">Moderate</option>
-                <option value="high" className="bg-[#0f172a]">High</option>
+                <option value="high"     className="bg-[#0f172a]">High</option>
               </select>
             </Field>
 
-            <Field icon={Moon}      label="Avg Sleep (Hrs)"   name="averageSleepTime" type="number" value={patient.averageSleepTime} onChange={handleChange} disabled={!isEditing} placeholder="e.g. 8" />
+            <Field icon={Moon}      label="Avg Sleep (Hrs)" name="averageSleepTime" type="number" value={patient.averageSleepTime} onChange={handleChange} disabled={!isEditing} placeholder="e.g. 8" />
 
-            <Field icon={Moon}      label="Sleep Quality"     name="sleepQuality"     value={patient.sleepQuality}     onChange={handleChange} disabled={!isEditing}>
+            <Field icon={Moon}      label="Sleep Quality"  name="sleepQuality"     value={patient.sleepQuality}     onChange={handleChange} disabled={!isEditing}>
               <select name="sleepQuality" value={patient.sleepQuality} onChange={handleChange} disabled={!isEditing}
                 className="w-full bg-transparent outline-none text-sm font-bold text-white disabled:cursor-not-allowed">
                 <option value="excellent" className="bg-[#0f172a]">Excellent</option>
-                <option value="moderate" className="bg-[#0f172a]">Moderate</option>
-                <option value="poor" className="bg-[#0f172a]">Poor</option>
+                <option value="moderate"  className="bg-[#0f172a]">Moderate</option>
+                <option value="poor"      className="bg-[#0f172a]">Poor</option>
               </select>
             </Field>
 
-            <Field icon={HeartPulse} label="BP Issues"        name="bpIssues"         value={patient.bpIssues}         onChange={handleChange} disabled={!isEditing}>
+            <Field icon={HeartPulse} label="BP Issues"     name="bpIssues"         value={patient.bpIssues}         onChange={handleChange} disabled={!isEditing}>
               <select name="bpIssues" value={patient.bpIssues} onChange={handleChange} disabled={!isEditing}
                 className="w-full bg-transparent outline-none text-sm font-bold text-white disabled:cursor-not-allowed">
                 <option value="y" className="bg-[#0f172a]">Yes</option>
