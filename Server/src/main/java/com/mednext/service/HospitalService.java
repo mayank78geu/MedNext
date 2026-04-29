@@ -28,6 +28,11 @@ public class HospitalService {
                 .orElseThrow(() -> new RuntimeException("Hospital not found with id: " + id));
     }
 
+    public Hospital getHospitalByUserId(Long userId) {
+        return hospitalRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Hospital not found for user id: " + userId));
+    }
+
     public Hospital updateHospital(Long id, Hospital hospitalDetails) {
         Hospital existingHospital = getHospitalById(id);
         

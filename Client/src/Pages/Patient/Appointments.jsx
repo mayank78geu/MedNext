@@ -1,231 +1,250 @@
 import React, { useState, useEffect } from "react";
-import { CalendarCheck, ChevronLeft, ChevronRight, Clock, UserRound, ArrowRight, ShieldCheck, Activity } from "lucide-react";
+import { motion } from "framer-motion";
+import { CalendarCheck, ChevronLeft, ChevronRight, Clock, Activity, ArrowUpRight, X } from "lucide-react";
 import { GetPatientAppointments } from "../../api/appointments.api";
+
+const statusColors = {
+  BOOKED:    "bg-indigo-500/20 text-indigo-300 border-indigo-500/30",
+  CONFIRMED: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+  CANCELLED: "bg-red-500/20 text-red-300 border-red-500/30",
+  COMPLETED: "bg-slate-500/20 text-slate-300 border-slate-500/30",
+  PENDING:   "bg-amber-500/20 text-amber-300 border-amber-500/30",
+};
 
 export default function Appointments() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDay, setSelectedDay] = useState(null);
 
   useEffect(() => {
-    const fetchApps = async () => {
-      try {
-        const data = await GetPatientAppointments();
-        setAppointments(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Failed fetching appointments for calendar:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchApps();
+    GetPatientAppointments()
+      .then(d => setAppointments(Array.isArray(d) ? d : []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  const year = currentDate.getFullYear();
+  const year  = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const daysOfWeek = ["S","M","T","W","T","F","S"];
 
-  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
-  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
-
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-  const normalizeDateStr = (dateString) => {
-    const d = new Date(dateString);
-    if (isNaN(d)) return "";
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const normDate = (ds) => {
+    const d = new Date(ds);
+    return isNaN(d) ? "" : `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
   };
 
-  const getAppointmentsForDay = (day) => {
-    const checkDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return appointments.filter(app => normalizeDateStr(app.date) === checkDateStr);
+  const appsForDay = (day) => {
+    const key = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    return appointments.filter(a => normDate(a.date) === key);
   };
 
-  const upcomingAppointments = appointments
-    .filter(app => {
-      const appDate = new Date(app.date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      return appDate >= today;
-    })
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
+  const today = new Date();
+  const upcoming = appointments
+    .filter(a => { const d = new Date(a.date); const t = new Date(); t.setHours(0,0,0,0); return d >= t; })
+    .sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  const selectedApps = selectedDay ? appsForDay(selectedDay) : [];
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-900 pb-20">
-      
-      {/* Header - Consistent with Dashboards */}
-      <div className="p-10 max-w-7xl mx-auto space-y-10 animate-fadeIn overflow-y-auto">
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-1">
-              <h1 className="text-3xl font-black tracking-tight text-slate-800 uppercase">Consultation Schedule</h1>
-              <p className="text-slate-500 font-medium flex items-center gap-2">
-                Manage your clinical timeline <ArrowRight size={14} className="text-blue-500" />
-              </p>
-          </div>
-          <div className="flex items-center gap-2 text-slate-400 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100">
-             <ShieldCheck size={18} className="text-green-500" />
-             <span className="text-[10px] font-black uppercase tracking-widest leading-none">Identity Linked</span>
-          </div>
-        </header>
+    <div className="min-h-full bg-[#060d1f] text-white font-sans">
+      <div className="p-8 space-y-8">
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between"
+        >
+          <div>
+            <h1 className="text-3xl font-black uppercase tracking-tight">
+              Consultation <span className="bg-gradient-to-r from-indigo-300 to-violet-300 bg-clip-text text-transparent">Schedule</span>
+            </h1>
+            <p className="text-slate-500 text-sm mt-1">Your clinical timeline — synchronized in real time</p>
+          </div>
+          <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Live Feed</span>
+          </div>
+        </motion.div>
 
-          {/* --- CALENDAR UI (Premium Glassmorphism Style) --- */}
-          <div className="lg:col-span-2 bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
-               <CalendarCheck size={120} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* CALENDAR */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="lg:col-span-2 bg-white/5 border border-white/8 rounded-3xl p-6"
+          >
+            {/* Month nav */}
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-black text-white">{monthNames[month]} {year}</h2>
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">Clinical Calendar</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setCurrentDate(new Date(year, month - 1, 1))}
+                  className="w-9 h-9 flex items-center justify-center bg-white/5 hover:bg-indigo-600/30 rounded-xl text-slate-400 hover:text-indigo-300 transition-all"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  onClick={() => setCurrentDate(new Date(year, month + 1, 1))}
+                  className="w-9 h-9 flex items-center justify-center bg-white/5 hover:bg-indigo-600/30 rounded-xl text-slate-400 hover:text-indigo-300 transition-all"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
             </div>
 
-            <div className="flex justify-between items-center mb-10 relative z-10">
-              <div className="space-y-1">
-                <h2 className="text-2xl font-black text-slate-800 tracking-tight">
-                  {monthNames[month]} {year}
-                </h2>
-                <p className="text-[10px] items-center flex gap-1 font-black text-blue-500 uppercase tracking-widest italic">
-                  Clinical Calendar Hub
-                </p>
-              </div>
-              <div className="flex gap-4">
-                <button 
-                  onClick={prevMonth} 
-                  className="w-12 h-12 flex items-center justify-center bg-slate-50 rounded-2xl hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-slate-100 active:scale-95"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <button 
-                  onClick={nextMonth} 
-                  className="w-12 h-12 flex items-center justify-center bg-slate-50 rounded-2xl hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-slate-100 active:scale-95"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-7 gap-4 relative z-10">
-              {/* Weekdays */}
-              {daysOfWeek.map(d => (
-                <div key={d} className="font-black text-slate-300 text-[10px] uppercase tracking-[0.2em] mb-4 text-center">{d}</div>
+            {/* Grid */}
+            <div className="grid grid-cols-7 gap-1.5">
+              {daysOfWeek.map((d, i) => (
+                <div key={i} className="text-center text-[10px] font-black text-slate-600 uppercase tracking-widest pb-2">{d}</div>
               ))}
-
-              {/* Offset Days */}
               {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-                <div key={`empty-${i}`} className="p-2" />
+                <div key={`e-${i}`} />
               ))}
-
-              {/* Actual Days */}
               {Array.from({ length: daysInMonth }).map((_, i) => {
                 const day = i + 1;
-                const appsForDay = getAppointmentsForDay(day);
-
-                const isToday =
-                  new Date().getDate() === day &&
-                  new Date().getMonth() === month &&
-                  new Date().getFullYear() === year;
+                const apps = appsForDay(day);
+                const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+                const isSelected = selectedDay === day;
 
                 return (
-                  <div
+                  <motion.button
                     key={day}
-                    className={`relative p-4 flex flex-col items-center justify-center min-h-[90px] rounded-3xl border transition-all duration-300 cursor-default group/day
-                      ${isToday ? 'border-blue-400 bg-blue-50/50 ring-4 ring-blue-500/5' : 'border-slate-50 bg-slate-50/50 hover:bg-white hover:border-blue-200 hover:shadow-xl hover:shadow-blue-500/5'}
-                      ${appsForDay.length > 0 ? 'bg-white' : ''}
-                    `}
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSelectedDay(isSelected ? null : day)}
+                    className={`relative flex flex-col items-center justify-center rounded-2xl p-2 min-h-[56px] transition-all border ${
+                      isSelected
+                        ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-900/40"
+                        : isToday
+                          ? "bg-violet-600/20 border-violet-500/40 text-violet-300"
+                          : apps.length > 0
+                            ? "bg-indigo-500/10 border-indigo-500/20 text-slate-200 hover:bg-indigo-500/20"
+                            : "bg-white/3 border-white/5 text-slate-500 hover:bg-white/8 hover:text-slate-300"
+                    }`}
                   >
-                    <span className={`text-lg font-black tracking-tighter ${isToday ? 'text-blue-700' : 'text-slate-800'} group-hover/day:scale-110 transition-transform`}>
-                      {day}
-                    </span>
-
-                    {/* Indicators */}
-                    {appsForDay.length > 0 && (
-                      <div className="flex gap-1 mt-3 flex-wrap justify-center">
-                        {appsForDay.map((a, idx) => (
-                           <div key={idx} className="status-dot dot-live w-1.5 h-1.5" />
+                    <span className="text-sm font-black">{day}</span>
+                    {apps.length > 0 && (
+                      <div className="flex gap-0.5 mt-1">
+                        {apps.slice(0, 3).map((_, idx) => (
+                          <span key={idx} className={`w-1 h-1 rounded-full ${isSelected ? "bg-white" : "bg-indigo-400"}`} />
                         ))}
                       </div>
                     )}
-                  </div>
+                  </motion.button>
                 );
               })}
             </div>
-          </div>
 
-          {/* --- UPCOMING LIST (Timeline Style) --- */}
-          <div className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col h-full overflow-hidden">
-            <div className="flex items-center justify-between mb-10">
-               <div className="space-y-1">
-                 <h2 className="text-xl font-black text-slate-800 tracking-tight leading-none uppercase">Upcoming</h2>
-                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic leading-none">Sync Timeline</p>
-               </div>
-               <div className="p-3 bg-blue-50 rounded-2xl text-blue-600">
-                  <Activity size={24} />
-               </div>
+            {/* Day detail popup */}
+            {selectedDay && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-4 bg-indigo-600/10 border border-indigo-500/20 rounded-2xl p-4"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-sm font-black text-indigo-300 uppercase tracking-widest">
+                    {monthNames[month]} {selectedDay}
+                  </p>
+                  <button onClick={() => setSelectedDay(null)} className="text-slate-500 hover:text-white transition-colors">
+                    <X size={14} />
+                  </button>
+                </div>
+                {selectedApps.length === 0 ? (
+                  <p className="text-xs text-slate-500 italic">No appointments on this day</p>
+                ) : (
+                  <div className="space-y-2">
+                    {selectedApps.map(a => (
+                      <div key={a.id} className="flex items-center gap-3 bg-white/5 rounded-xl p-3">
+                        <div className="w-7 h-7 rounded-lg bg-indigo-600/20 flex items-center justify-center text-indigo-400 text-xs font-black">
+                          {(a.doctorName || "D").charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-white">{a.doctorName || `Doctor #${a.doctorId}`}</p>
+                          <p className="text-[10px] text-slate-500">{a.time || "TBD"}</p>
+                        </div>
+                        <span className={`ml-auto text-[9px] font-black px-2 py-0.5 rounded-full border ${statusColors[a.status] || statusColors.BOOKED}`}>
+                          {a.status || "BOOKED"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </motion.div>
+
+          {/* UPCOMING LIST */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.15 }}
+            className="bg-white/5 border border-white/8 rounded-3xl p-6 flex flex-col"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-9 h-9 bg-indigo-600/20 rounded-xl flex items-center justify-center text-indigo-400">
+                <Activity size={17} />
+              </div>
+              <div>
+                <h2 className="text-sm font-black text-white uppercase tracking-tight">Upcoming</h2>
+                <p className="text-[10px] text-slate-500">{upcoming.length} sessions</p>
+              </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-2 space-y-6 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto space-y-3 pr-0.5 scrollbar-hide">
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                   <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                   <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Restoring timeline...</p>
+                <div className="flex justify-center py-10">
+                  <div className="w-7 h-7 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
                 </div>
-              ) : upcomingAppointments.length === 0 ? (
-                <div className="text-center py-20 space-y-4 opacity-50">
-                   <div className="w-16 h-16 bg-slate-50 rounded-full mx-auto flex items-center justify-center">
-                      <Clock size={32} />
-                   </div>
-                   <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Quiet schedule detected</p>
+              ) : upcoming.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-slate-600">
+                  <Clock size={28} className="mb-2 opacity-30" />
+                  <p className="text-xs font-bold text-center">Your schedule is clear</p>
                 </div>
               ) : (
-                upcomingAppointments.map((app) => (
-                  <div
+                upcoming.map((app, i) => (
+                  <motion.div
                     key={app.id}
-                    className="p-6 rounded-3xl bg-[#f8fafc] border border-slate-100 hover:bg-white hover:border-blue-400 hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer group/item relative overflow-hidden"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 + i * 0.07 }}
+                    className="group bg-white/3 hover:bg-white/8 border border-white/5 hover:border-indigo-500/30 rounded-2xl p-4 transition-all cursor-pointer"
                   >
-                    <div className="absolute top-0 right-0 p-3 opacity-0 group-hover/item:opacity-100 transition-opacity">
-                        <ArrowRight size={14} className="text-blue-500" />
-                    </div>
-
-                    <div className="flex items-center gap-4 mb-4">
-                       <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center font-black text-slate-400 group-hover/item:bg-blue-600 group-hover/item:text-white transition-all duration-300 shadow-sm border border-slate-50">
-                          {(app.doctorName || 'D').charAt(0)}
-                       </div>
-                       <div className="space-y-0.5">
-                          <h3 className="font-black text-slate-800 leading-tight">
-                            {app.doctorName || `Doctor #${app.doctorId}`}
-                          </h3>
-                          <span className="text-[9px] font-black text-blue-500 uppercase tracking-tighter italic">
-                             {app.specialty || "Verified Specialist"}
-                          </span>
-                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 pb-4 border-b border-slate-200/50">
-                        <span className="flex items-center gap-1.5"><CalendarCheck size={12} className="text-blue-500" /> {app.date}</span>
-                        <span className="flex items-center gap-1.5"><Clock size={12} className="text-amber-500" /> {app.time || "TBD"}</span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <button className="py-3 bg-white border border-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-slate-50 transition-all">
-                        Postpone
-                      </button>
-                      <button className="py-3 bg-white border border-slate-100 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-red-50 hover:border-red-100 transition-all">
-                        Cancel
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-9 h-9 rounded-xl bg-indigo-600/20 group-hover:bg-indigo-600/30 flex items-center justify-center text-indigo-300 font-black text-sm transition-all flex-shrink-0">
+                        {(app.doctorName || "D").charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-black text-white truncate">
+                          {app.doctorName || `Doctor #${app.doctorId}`}
+                        </p>
+                        <p className="text-[10px] text-indigo-400/70 italic">Verified Specialist</p>
+                      </div>
+                      <button className="opacity-0 group-hover:opacity-100 w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 text-slate-500 hover:text-indigo-400 transition-all">
+                        <ArrowUpRight size={12} />
                       </button>
                     </div>
-                  </div>
+                    <div className="flex items-center gap-3 text-[10px] font-bold text-slate-500 border-t border-white/5 pt-3">
+                      <span className="flex items-center gap-1.5"><CalendarCheck size={10} className="text-indigo-400" /> {app.date}</span>
+                      <span className="flex items-center gap-1.5"><Clock size={10} className="text-violet-400" /> {app.time || "TBD"}</span>
+                      <span className={`ml-auto text-[9px] font-black px-2 py-0.5 rounded-full border ${statusColors[app.status] || statusColors.BOOKED}`}>
+                        {app.status || "BOOKED"}
+                      </span>
+                    </div>
+                  </motion.div>
                 ))
               )}
             </div>
-            
-            <div className="mt-8">
-               <button className="w-full bg-[#0f172a] text-white py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.25em] shadow-xl shadow-slate-900/10 hover:bg-blue-600 hover:-translate-y-1 active:translate-y-0 transition-all">
-                  Sync with Calendar
-               </button>
-            </div>
-          </div>
+          </motion.div>
 
         </div>
       </div>

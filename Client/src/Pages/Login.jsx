@@ -38,7 +38,12 @@ const Login = () => {
 
         try {
             const response = await LoginUser({ email, password });
-            const { token, role, name } = response.data;
+
+            if (response && response.success === false) {
+                throw new Error(response.message || "Login failed");
+            }
+
+            const { token, role, name } = response.data || {};
 
             localStorage.setItem("token", token);
             localStorage.setItem("role", role);

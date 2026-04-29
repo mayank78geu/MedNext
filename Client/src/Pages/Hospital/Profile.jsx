@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Building2, 
   MapPin, 
@@ -10,22 +10,73 @@ import {
   Users, 
   ArrowRight,
   Clock,
-  Briefcase
+  Briefcase,
+  Save,
+  XCircle
 } from "lucide-react";
+import { toast } from "react-toastify";
+import { GetUserByEmail } from "../../api/users.api.js";
+import { GetHospitalByUserId, UpdateHospital } from "../../api/hospitals.api.js";
 
 export default function Profile() {
-  const hospitalInfo = {
-    name: "MedNext Central Hospital",
-    type: "Multi-Speciality Tertiary Care",
-    location: "Bandra West, Mumbai, Maharashtra 400050",
-    email: "ops@mednext-central.com",
-    contact: "+91 22 4567 8900",
-    website: "www.mednext-central.com",
-    founded: "2012",
-    staffCount: "450+",
-    beds: "250",
-    certifications: ["NABH Accredited", "ISO 9001:2015", "JCI Gold Seal"]
+  const [hospitalInfo, setHospitalInfo] = useState({
+    name: "Loading...",
+    address: "",
+    city: ""
+  });
+  const [userEmail, setUserEmail] = useState("");
+  const [hospitalId, setHospitalId] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const email = payload.sub;
+        setUserEmail(email);
+
+        const userData = await GetUserByEmail(email);
+        const userId = userData.data.id;
+
+        const hospData = await GetHospitalByUserId(userId);
+        if (hospData) {
+            setHospitalId(hospData.id);
+            setHospitalInfo({
+                name: hospData.name || "",
+                address: hospData.address || "",
+                city: hospData.city || ""
+            });
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile", err);
+        toast.error("Failed to load profile data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleChange = (e) => {
+    setHospitalInfo({ ...hospitalInfo, [e.target.name]: e.target.value });
   };
+
+  const handleSave = async () => {
+    try {
+        await UpdateHospital(hospitalId, hospitalInfo);
+        setIsEditing(false);
+        toast.success("Hospital credentials updated successfully.");
+    } catch (err) {
+        toast.error("Failed to update credentials.");
+    }
+  };
+
+  if (loading) {
+      return <div className="min-h-screen p-10 flex justify-center items-center font-black text-slate-400 uppercase tracking-widest">Loading Credentials...</div>;
+  }
 
   return (
     <div className="p-10 space-y-10 animate-fadeIn">
@@ -45,12 +96,17 @@ export default function Profile() {
                   Verified Institution
                </div>
                <h2 className="text-5xl font-black text-white uppercase tracking-tighter leading-none">{hospitalInfo.name}</h2>
-               <p className="text-blue-400 font-black text-xs uppercase tracking-[0.2em]">{hospitalInfo.type}</p>
+               <p className="text-blue-400 font-black text-xs uppercase tracking-[0.2em]">{hospitalInfo.city ? `Located in ${hospitalInfo.city}` : "Location Pending"}</p>
             </div>
             
-            <button className="bg-white text-slate-900 px-8 py-5 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-blue-600 hover:text-white transition-all shadow-2xl active:scale-95 group">
-               Update Credentials <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform inline ml-2" />
-            </button>
+            {!isEditing && (
+               <button 
+                  onClick={() => setIsEditing(true)}
+                  className="bg-white text-slate-900 px-8 py-5 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-blue-600 hover:text-white transition-all shadow-2xl active:scale-95 group"
+               >
+                  Update Credentials <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform inline ml-2" />
+               </button>
+            )}
          </div>
       </div>
 
@@ -61,80 +117,66 @@ export default function Profile() {
             
             <div className="bg-white p-12 rounded-[3.5rem] border border-slate-100 shadow-sm space-y-12">
                <div className="space-y-8">
-                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em] border-b border-slate-50 pb-6">General Information</h3>
+                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em] border-b border-slate-50 pb-6 flex items-center justify-between">
+                     General Information
+                  </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                     
                      <div className="space-y-2">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Physical Location</p>
-                        <div className="flex items-start gap-3">
-                           <MapPin className="text-indigo-600 mt-0.5 flex-shrink-0" size={18} />
-                           <p className="text-sm font-bold text-slate-700">{hospitalInfo.location}</p>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Institution Name</label>
+                        <div className={`flex items-start gap-3 bg-[#f8fafc] border rounded-2xl px-5 py-4 transition-all ${isEditing ? 'border-blue-400 ring-4 ring-blue-500/5 bg-white' : 'border-slate-100 cursor-not-allowed opacity-70'}`}>
+                           <Building2 className={`${isEditing ? 'text-blue-500' : 'text-indigo-600'} mt-0.5 flex-shrink-0`} size={18} />
+                           <input type="text" name="name" value={hospitalInfo.name} onChange={handleChange} disabled={!isEditing} className="w-full bg-transparent outline-none font-bold text-slate-700" />
                         </div>
                      </div>
-                     <div className="space-y-2">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact Gateway</p>
-                        <div className="flex items-center gap-3">
-                           <Phone className="text-indigo-600 flex-shrink-0" size={18} />
-                           <p className="text-sm font-bold text-slate-700">{hospitalInfo.contact}</p>
-                        </div>
-                     </div>
-                     <div className="space-y-2">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Official Email</p>
-                        <div className="flex items-center gap-3">
-                           <Mail className="text-indigo-600 flex-shrink-0" size={18} />
-                           <p className="text-sm font-bold text-slate-700">{hospitalInfo.email}</p>
-                        </div>
-                     </div>
-                     <div className="space-y-2">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Digital Presence</p>
-                        <div className="flex items-center gap-3">
-                           <Globe className="text-indigo-600 flex-shrink-0" size={18} />
-                           <p className="text-sm font-bold text-slate-700">{hospitalInfo.website}</p>
-                        </div>
-                     </div>
-                  </div>
-               </div>
 
-               <div className="space-y-8">
-                  <h3 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em] border-b border-slate-50 pb-6">Clinical Capacity</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                     {[
-                        { label: "Founded", val: hospitalInfo.founded, icon: <Clock /> },
-                        { label: "Personnel", val: hospitalInfo.staffCount, icon: <Users /> },
-                        { label: "Bed Count", val: hospitalInfo.beds, icon: <Briefcase /> },
-                        { label: "Status", val: "Operational", icon: <ShieldCheck /> }
-                     ].map((item, i) => (
-                        <div key={i} className="text-center space-y-3 group">
-                           <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 mx-auto group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
-                              {React.cloneElement(item.icon, { size: 20 })}
-                           </div>
-                           <div>
-                              <p className="text-[14px] font-black text-slate-800 leading-none">{item.val}</p>
-                              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">{item.label}</p>
-                           </div>
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Physical Address</label>
+                        <div className={`flex items-start gap-3 bg-[#f8fafc] border rounded-2xl px-5 py-4 transition-all ${isEditing ? 'border-blue-400 ring-4 ring-blue-500/5 bg-white' : 'border-slate-100 cursor-not-allowed opacity-70'}`}>
+                           <MapPin className={`${isEditing ? 'text-blue-500' : 'text-indigo-600'} mt-0.5 flex-shrink-0`} size={18} />
+                           <input type="text" name="address" placeholder="Enter detailed address" value={hospitalInfo.address} onChange={handleChange} disabled={!isEditing} className="w-full bg-transparent outline-none font-bold text-slate-700" />
                         </div>
-                     ))}
+                     </div>
+
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">City</label>
+                        <div className={`flex items-start gap-3 bg-[#f8fafc] border rounded-2xl px-5 py-4 transition-all ${isEditing ? 'border-blue-400 ring-4 ring-blue-500/5 bg-white' : 'border-slate-100 cursor-not-allowed opacity-70'}`}>
+                           <Globe className={`${isEditing ? 'text-blue-500' : 'text-indigo-600'} mt-0.5 flex-shrink-0`} size={18} />
+                           <input type="text" name="city" placeholder="e.g. Mumbai" value={hospitalInfo.city} onChange={handleChange} disabled={!isEditing} className="w-full bg-transparent outline-none font-bold text-slate-700" />
+                        </div>
+                     </div>
+
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Registered Email</label>
+                        <div className={`flex items-start gap-3 bg-[#f8fafc] border rounded-2xl px-5 py-4 transition-all border-slate-100 cursor-not-allowed opacity-70`}>
+                           <Mail className={`text-indigo-600 mt-0.5 flex-shrink-0`} size={18} />
+                           <input type="email" value={userEmail} disabled className="w-full bg-transparent outline-none font-bold text-slate-700" />
+                        </div>
+                     </div>
+
                   </div>
+
+                  {isEditing && (
+                     <div className="flex justify-end gap-4 pt-6 border-t border-slate-100 animate-fadeIn mt-8">
+                       <button
+                         onClick={() => setIsEditing(false)}
+                         className="flex items-center gap-2 px-8 py-4 bg-white border border-slate-200 text-slate-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95"
+                       >
+                         <XCircle size={16} /> Discard Changes
+                       </button>
+                       <button
+                         onClick={handleSave}
+                         className="flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all active:scale-95 shadow-xl shadow-blue-500/20"
+                       >
+                         <Save size={16} /> Update Credentials
+                       </button>
+                     </div>
+                  )}
+
                </div>
             </div>
 
-            {/* Accreditation Banner */}
-            <div className="bg-indigo-600 p-12 rounded-[3.5rem] shadow-2xl shadow-indigo-900/20 text-white flex flex-col md:flex-row items-center gap-10 relative overflow-hidden group">
-               <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
-                  <Award size={180} />
-               </div>
-               <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-[1.5rem] flex items-center justify-center border border-white/20 shrink-0">
-                  <Award size={40} className="text-blue-300" />
-               </div>
-               <div className="space-y-4 text-center md:text-left">
-                  <h4 className="text-2xl font-black uppercase tracking-tight">Accreditation Excellence</h4>
-                  <div className="flex flex-wrap justify-center md:justify-start gap-3">
-                     {hospitalInfo.certifications.map((cert, i) => (
-                        <span key={i} className="px-5 py-2 bg-white/5 border border-white/10 rounded-full text-[9px] font-black uppercase tracking-widest">{cert}</span>
-                     ))}
-                  </div>
-               </div>
-            </div>
          </div>
 
          {/* Admin Control Panel */}
@@ -151,7 +193,7 @@ export default function Profile() {
                   <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 space-y-4">
                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Admin Credentials</p>
                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-black text-slate-800 tracking-tight">MN-ADMIN-7729</p>
+                        <p className="text-xs font-black text-slate-800 tracking-tight">System Root</p>
                         <button className="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:underline">Change</button>
                      </div>
                   </div>
@@ -166,18 +208,9 @@ export default function Profile() {
 
                <div className="pt-6 border-t border-slate-50">
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic text-center leading-relaxed">
-                     Last profile update: <span className="text-indigo-600">Apr 24, 2024 at 09:12 PM</span> by Head Operations.
+                     Secure medical profile management. <span className="text-indigo-600">Encrypted</span> end-to-end.
                   </p>
                </div>
-            </div>
-
-            <div className="bg-[#0f172a] p-10 rounded-[3.5rem] shadow-2xl shadow-slate-900/10 text-white text-center space-y-6">
-               <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Technical Support</p>
-               <h4 className="text-xl font-black uppercase tracking-tight">Need Assistance?</h4>
-               <p className="text-xs text-slate-400 font-medium">Connect with MedNext enterprise support for clinical integration help.</p>
-               <button className="w-full bg-white text-slate-900 py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-600 hover:text-white transition-all shadow-xl">
-                  Contact Enterprise
-               </button>
             </div>
          </div>
 

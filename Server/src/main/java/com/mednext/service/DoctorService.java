@@ -27,12 +27,20 @@ public class DoctorService {
         return doctorRepository.findById(id).orElse(null);
     }
 
+    public Doctor getDoctorByUserId(Long userId) {
+        return doctorRepository.findByUserId(userId).orElse(null);
+    }
+
     public List<Doctor> searchByName(String name) {
         return doctorRepository.findByNameContainingIgnoreCase(name);
     }
 
     public List<Doctor> searchBySpecialization(String specialization) {
         return doctorRepository.findBySpecializationContainingIgnoreCase(specialization);
+    }
+
+    public List<Doctor> getDoctorsByHospitalId(Long hospitalId) {
+        return doctorRepository.findByHospitalId(hospitalId);
     }
 
     public Doctor createDoctor(Doctor doctor) {
