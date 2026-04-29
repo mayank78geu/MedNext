@@ -36,8 +36,13 @@ export default function RegisterForm() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!form.name.trim()) {
+        if (form.role !== "HOSPITAL" && !form.name.trim()) {
             setError("Enter full name");
+            return;
+        }
+
+        if (form.role === "HOSPITAL" && !form.hospitalName.trim()) {
+            setError("Please enter your hospital name");
             return;
         }
 
@@ -57,13 +62,8 @@ export default function RegisterForm() {
         }
 
         // Role-specific validation
-        if (form.role === "DOCTOR" && !form.specialization) {
+        if (form.role === "DOCTOR" && !form.specialization.trim()) {
             setError("Please enter your specialization");
-            return;
-        }
-
-        if (form.role === "HOSPITAL" && !form.hospitalName) {
-            setError("Please enter your hospital name");
             return;
         }
 
@@ -84,6 +84,10 @@ export default function RegisterForm() {
             const response = await RegisterUser(payload);
 
             console.log("REGISTER RESPONSE:", response);
+
+            if (response && response.success === false) {
+                throw new Error(response.message || "Registration failed");
+            }
 
             toast.success(response.message || "Registration Successful ✅");
 

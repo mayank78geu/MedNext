@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Button from "../Button/Button";
 import AppointmentForm from "../../Pages/AppointmentForm";
 
-const Doctors = ({ title, disease, description, buttonText = "Book Appointment" }) => {
+const Doctors = ({ title, disease, description, buttonText = "Book Appointment", doctorId, hospitalId }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
@@ -26,7 +26,7 @@ const Doctors = ({ title, disease, description, buttonText = "Book Appointment" 
       </Button>
 
       {isModalOpen && (
-        <AppointmentForm doctorName={title} onClose={closeModal} />
+        <AppointmentForm doctorName={title} doctorId={doctorId} hospitalId={hospitalId} onClose={closeModal} />
       )}
     </div>
   );

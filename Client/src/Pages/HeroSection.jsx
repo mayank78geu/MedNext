@@ -44,7 +44,20 @@ const HeroSection = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-24 animate-slideUp delay-200">
             <button
-              onClick={() => navigate("/find-doctors")}
+              onClick={() => {
+                const token = localStorage.getItem("token");
+                if (token) {
+                  try {
+                    const payload = JSON.parse(atob(token.split(".")[1]));
+                    const role = payload.role || payload.roles?.[0] || "";
+                    if (role === "PATIENT") {
+                      navigate("/patient-dashboard/find-doctors");
+                      return;
+                    }
+                  } catch {}
+                }
+                navigate("/login");
+              }}
               className="group relative px-10 py-5 bg-indigo-600 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-2xl shadow-indigo-200 hover:shadow-indigo-300 transition-all duration-300 hover:-translate-y-1 active:scale-95 flex items-center gap-3 overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>

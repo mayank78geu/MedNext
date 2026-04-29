@@ -1,14 +1,73 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Camera, Save, User as UserIcon, Mail, Phone, Award, Shield } from "lucide-react";
+import { toast } from "react-toastify";
+import { GetUserByEmail } from "../../api/users.api.js";
+import { GetDoctorByUserId, UpdateDoctor } from "../../api/doctors.api.js";
 
 export default function Profile() {
-  const saveProfile = () => {
-    alert("Profile details updated successfully!");
+  const [doctor, setDoctor] = useState({
+    name: "Loading...",
+    specialization: "",
+    experience: ""
+  });
+  const [userEmail, setUserEmail] = useState("");
+  const [doctorId, setDoctorId] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const email = payload.sub;
+        setUserEmail(email);
+
+        const userData = await GetUserByEmail(email);
+        const userId = userData.data.id;
+
+        const docData = await GetDoctorByUserId(userId);
+        if (docData) {
+            setDoctorId(docData.id);
+            setDoctor({
+                name: docData.name || "",
+                specialization: docData.specialization || "",
+                experience: docData.experience || ""
+            });
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile", err);
+        toast.error("Failed to load profile data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleChange = (e) => {
+    setDoctor({ ...doctor, [e.target.name]: e.target.value });
   };
 
+  const saveProfile = async () => {
+    try {
+        await UpdateDoctor(doctorId, {
+            name: doctor.name,
+            specialization: doctor.specialization,
+            experience: parseInt(doctor.experience) || 0
+        });
+        toast.success("Profile details updated successfully!");
+    } catch (err) {
+        toast.error("Failed to update profile.");
+    }
+  };
+
+  if (loading) {
+      return <div className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest">Loading Profile...</div>;
+  }
+
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-8">
-      {/* HEADER */}
+    <div className="p-8 max-w-5xl mx-auto space-y-8 animate-fadeIn">
       <div>
         <h1 className="text-3xl font-bold text-slate-800">My Profile</h1>
         <p className="text-slate-500 mt-2">Manage your public information and credential details.</p>
@@ -16,7 +75,6 @@ export default function Profile() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         
-        {/* LEFT COL: PROFILE PICTURE & BASIC */}
         <div className="col-span-1 space-y-6">
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 flex flex-col items-center">
             
@@ -29,22 +87,18 @@ export default function Profile() {
               </button>
             </div>
 
-            <h2 className="text-xl font-bold text-slate-800">Dr. Smith Doe</h2>
-            <p className="text-slate-500 font-medium">Senior Cardiologist</p>
+            <h2 className="text-xl font-bold text-slate-800">{doctor.name}</h2>
+            <p className="text-slate-500 font-medium">{doctor.specialization || "Specialization pending"}</p>
             
             <div className="mt-6 w-full space-y-3">
               <div className="flex items-center gap-3 text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <Mail size={16} className="text-blue-500"/> smith.doe@mednext.com
-              </div>
-              <div className="flex items-center gap-3 text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <Phone size={16} className="text-blue-500"/> +91 98765 43210
+                <Mail size={16} className="text-blue-500"/> {userEmail}
               </div>
             </div>
             
           </div>
         </div>
 
-        {/* RIGHT COL: DETAILS FORM */}
         <div className="col-span-2 space-y-6">
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8">
             <h2 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-4 mb-6">General Information</h2>
@@ -55,17 +109,22 @@ export default function Profile() {
                 <label className="block text-sm font-bold text-slate-700 mb-2">Full Name</label>
                 <input 
                   type="text" 
-                  defaultValue="Dr. Smith Doe"
-                  className="w-full border border-slate-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  name="name"
+                  value={doctor.name}
+                  onChange={handleChange}
+                  className="w-full border border-slate-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Specialty</label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Specialization</label>
                 <input 
                   type="text" 
-                  defaultValue="Cardiology"
-                  className="w-full border border-slate-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  name="specialization"
+                  value={doctor.specialization}
+                  onChange={handleChange}
+                  placeholder="e.g. Cardiology"
+                  className="w-full border border-slate-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium"
                 />
               </div>
 
@@ -75,37 +134,11 @@ export default function Profile() {
                 </label>
                 <input 
                   type="number" 
-                  defaultValue="12"
-                  className="w-full border border-slate-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                  <Shield size={16} className="text-green-500"/> License Number
-                </label>
-                <input 
-                  type="text" 
-                  defaultValue="MED-123456-IN"
-                  className="w-full border border-slate-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 mb-2">Consultation Fee (₹)</label>
-                <input 
-                  type="number" 
-                  defaultValue="800"
-                  className="w-full border border-slate-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 mb-2">Short Bio</label>
-                <textarea 
-                  rows="4"
-                  defaultValue="Experienced Cardiologist with over 12 years of clinical excellence in treating cardiovascular diseases. Dedicated to exemplary patient outcomes and following all necessary medical procedures with the use of the latest industry equipment and technology."
-                  className="w-full border border-slate-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+                  name="experience"
+                  value={doctor.experience}
+                  onChange={handleChange}
+                  placeholder="e.g. 12"
+                  className="w-full border border-slate-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none font-medium"
                 />
               </div>
 
