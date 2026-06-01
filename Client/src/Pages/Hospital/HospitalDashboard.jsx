@@ -32,13 +32,18 @@ export default function HospitalDashboard() {
         const userId = userData.data.id;
 
         const hospitalData = await GetHospitalByUserId(userId);
+        if (!hospitalData || !hospitalData.data) {
+          console.error("No hospital found for this user");
+          setLoading(false);
+          return;
+        }
         const hospitalId = hospitalData.data.id;
 
         const docsResponse = await GetDoctorsByHospitalId(hospitalId);
-        setDoctorsList(docsResponse.data || []);
+        setDoctorsList(docsResponse || []);
 
         const appsResponse = await GetAppointmentsByHospitalId(hospitalId);
-        setAppointmentsList(appsResponse.data || []);
+        setAppointmentsList(appsResponse || []);
       } catch (err) {
         console.error("Failed to load dashboard data", err);
       } finally {

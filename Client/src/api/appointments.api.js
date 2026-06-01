@@ -9,6 +9,18 @@ export const BookAppointment = async (appointmentData) => {
     }
 };
 
+/** For hospital admins booking on behalf of a patient (patientId in body, not from JWT) */
+export const BookAppointmentByHospital = async (appointmentData) => {
+    try {
+        const response = await api.post("/api/appointments/hospital/book", appointmentData);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: "Failed to book appointment" };
+    }
+};
+
+
+
 export const GetPatientAppointments = async () => {
     try {
         const response = await api.get("/api/appointments/patient");

@@ -38,10 +38,15 @@ export default function Doctors() {
 
       const userData = await GetUserByEmail(email);
       const hospitalData = await GetHospitalByUserId(userData.data.id);
+      if (!hospitalData || !hospitalData.data) {
+        console.error("No hospital found for this user");
+        setLoading(false);
+        return;
+      }
       setHospitalId(hospitalData.data.id);
 
       const docsResponse = await GetDoctorsByHospitalId(hospitalData.data.id);
-      setDoctors(docsResponse.data || []);
+      setDoctors(docsResponse || []);
     } catch (err) {
       console.error("Failed to fetch doctors", err);
     } finally {

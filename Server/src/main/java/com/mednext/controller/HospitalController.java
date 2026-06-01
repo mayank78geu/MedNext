@@ -96,6 +96,15 @@ public class HospitalController {
         Hospital hospital = hospitalService.getHospitalById(hospitalId);
         
         doctor.setHospital(hospital);
+
+        // Apply optional doctor-specific fields from the registration request
+        if (request.getSpecialization() != null && !request.getSpecialization().isBlank()) {
+            doctor.setSpecialization(request.getSpecialization());
+        }
+        if (request.getExperience() != null) {
+            doctor.setExperience(request.getExperience());
+        }
+
         doctorService.updateDoctor(doctor.getId(), doctor);
         
         return ApiResponse.success("Doctor registered and linked to hospital successfully", doctor);

@@ -25,4 +25,8 @@ public class Hospital {
     private String address;
 
     private String city;
-}
+
+    private String phone;
+
+    private String specialties;
+}
