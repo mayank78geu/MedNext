@@ -45,6 +45,12 @@ public class HospitalService {
         if (hospitalDetails.getCity() != null) {
             existingHospital.setCity(hospitalDetails.getCity());
         }
+        if (hospitalDetails.getPhone() != null) {
+            existingHospital.setPhone(hospitalDetails.getPhone());
+        }
+        if (hospitalDetails.getSpecialties() != null) {
+            existingHospital.setSpecialties(hospitalDetails.getSpecialties());
+        }
         
         return hospitalRepository.save(existingHospital);
     }

@@ -18,4 +18,8 @@ public class RegisterRequest {
 
     @NotBlank
     private String role;
+
+    // Optional doctor-specific fields used during hospital doctor registration
+    private String specialization;
+    private Integer experience;
 }

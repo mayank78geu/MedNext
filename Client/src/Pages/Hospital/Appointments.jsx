@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { GetUserByEmail, GetUserById } from "../../api/users.api.js";
 import { GetHospitalByUserId } from "../../api/hospitals.api.js";
-import { GetAppointmentsByHospitalId, BookAppointment } from "../../api/appointments.api.js";
+import { GetAppointmentsByHospitalId, BookAppointmentByHospital } from "../../api/appointments.api.js";
 import { GetDoctorsByHospitalId } from "../../api/doctors.api.js";
 
 export default function Appointments() {
@@ -42,20 +42,24 @@ export default function Appointments() {
 
       const userData = await GetUserByEmail(email);
       const hospitalData = await GetHospitalByUserId(userData.data.id);
-      setHospitalId(hospitalData.data.id);
+      if (!hospitalData || !hospitalData.data) {
+        console.error("No hospital found for this user");
+        setLoading(false);
+        return;
+      }
+      const hId = hospitalData.data.id;
+      setHospitalId(hId);
 
-      const appsResponse = await GetAppointmentsByHospitalId(hospitalData.data.id);
+      const appsResponse = await GetAppointmentsByHospitalId(hId);
       
-      // We need to fetch patient and doctor names
+      // Enrich appointments with patient names
       const enrichedApps = await Promise.all(
-         (appsResponse.data || []).map(async (app) => {
+         (Array.isArray(appsResponse) ? appsResponse : []).map(async (app) => {
              try {
-                // Fetch user to get patient name (patientId is userId for patients)
                 const patientUser = await GetUserById(app.patientId);
-                // Doctor is already available in our doctors list or we can fetch
                 return {
                     ...app,
-                    patientName: patientUser.data.name,
+                    patientName: patientUser.data?.name || "Unknown",
                 };
              } catch(e) {
                 return { ...app, patientName: "Unknown" };
@@ -64,8 +68,8 @@ export default function Appointments() {
       );
       setAppointments(enrichedApps);
 
-      const docsResponse = await GetDoctorsByHospitalId(hospitalData.data.id);
-      setDoctors(docsResponse.data || []);
+      const docsResponse = await GetDoctorsByHospitalId(hId);
+      setDoctors(docsResponse || []);
       
     } catch (err) {
       console.error("Failed to fetch appointments", err);
@@ -92,7 +96,7 @@ export default function Appointments() {
          status: 'BOOKED'
       };
 
-      await BookAppointment(payload);
+      await BookAppointmentByHospital(payload);
       setShowAddModal(false);
       setFormData({ date: '', time: '', doctorId: '' });
       setPatientEmail('');

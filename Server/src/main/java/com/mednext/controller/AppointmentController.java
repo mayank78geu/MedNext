@@ -114,4 +114,13 @@ public class AppointmentController {
     public List<Appointment> getByHospital(@PathVariable Long hospitalId) {
         return appointmentService.getByHospital(hospitalId);
     }
+
+    // BOOK BY HOSPITAL ADMIN (patientId provided in body, not from JWT)
+    @PostMapping("/hospital/book")
+    public ApiResponse<?> bookByHospital(@RequestBody Appointment appointment) {
+        if (appointment.getPatientId() == null) {
+            return ApiResponse.error("Patient ID is required for hospital booking.");
+        }
+        return appointmentService.bookAppointment(appointment);
+    }
 }
